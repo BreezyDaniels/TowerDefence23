@@ -5,6 +5,7 @@ import constantes as c
 #importo clases
 from enemigo import Enemigo
 from world import World
+from torre import Torre
 #Importo json para poder traer las coordenadas de el pathing de los enemigos desde tile
 import json
 
@@ -22,10 +23,28 @@ pg.display.set_caption("Tower Defence")
 #Cargar imagenes
 map_image = pg.image.load('levels/map.png').convert_alpha()
 enemigo_image = pg.image.load('assets/images/enemigo.png').convert_alpha()
+cursor_torre = pg.image.load('assets/images/cursor_torre.png').convert_alpha()
 
 #Cargo las coordenadas del json exportado de tile  
 with open('levels/POLIPOINTS.tmj') as file:
   world_data = json.load(file)
+
+def crear_torre(mouse_pos):
+  mouse_tile_x = mouse_pos[0] // c.TILE_SIZE
+  mouse_tile_y = mouse_pos[1] // c.TILE_SIZE
+  #calcular el numero secuencial del tile
+  mouse_tile_num = (mouse_tile_y * c.COLUMNAS) + mouse_tile_x
+  #chequear si en ese slot se pueden poner torres
+  if world.tile_map[mouse_tile_num] == 0:
+    #chequear que no haya ya una torreta en ese slot
+    space_is_free = True
+    for torre in torre_group:
+      if (mouse_tile_x, mouse_tile_y) == (torre.tile_x, torre.tile_y):
+        space_is_free = False
+    #si el espacio esta libre entonces crea la torre
+    if space_is_free == True: 
+      nueva_torre = Torre(cursor_torre, mouse_tile_x, mouse_tile_y)
+      torre_group.add(nueva_torre)
 
 #Crear mundo
 world = World(world_data, map_image)
@@ -33,6 +52,7 @@ world.process_data()
 
 #Crear grupos
 enemigo_group = pg.sprite.Group()
+torre_group = pg.sprite.Group()
 
 
 
@@ -61,6 +81,7 @@ while run:
 
   #dibujar grupos
   enemigo_group.draw(screen)
+  torre_group.draw(screen)
 
   
 
@@ -69,6 +90,12 @@ while run:
     # Si el evento es cerrar la ventana, corto el bucle y salgo del juego
     if event.type == pg.QUIT:
       run = False
+    #click de mouse
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+      mouse_pos = pg.mouse.get_pos()
+      #chequear si el mouse esta en el area del juego
+      if mouse_pos[0] < c.SCREEN_WIDTH and mouse_pos[1] < c.SCREEN_HEIGHT:
+        crear_torre(mouse_pos)
 
   #actualizar display
   pg.display.flip()

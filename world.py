@@ -2,6 +2,8 @@ import pygame as pg
 
 class World():
     def __init__(self, data, map_image):
+        #esta lista vacia recibe los slots en los que no puedo poner una torreta
+        self.tile_map = []
         #esta lista vacia recibe los x e y del process waypoints
         self.waypoints = []
         self.level_data = data
@@ -14,7 +16,9 @@ class World():
     def process_data(self):
         #ver data para extraer la info que quiero
         for layer in self.level_data["layers"]:
-            if layer["name"] == "waypoints":
+            if layer ["name"] == "Tile Layer 1":
+                self.tile_map = layer["data"]
+            elif layer["name"] == "waypoints":
                 for obj in layer["objects"]:
                     waypoints_data = obj["polyline"]
                     self.process_waypoints(waypoints_data)
